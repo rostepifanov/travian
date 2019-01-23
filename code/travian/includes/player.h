@@ -112,8 +112,8 @@ private:
     const size_t domain_range = 18;
     const size_t village_range = 40;
 
-
     resourses res;
+    std::string build_button_id;
 
     typedef void (player::*execute)(const cmd_line&);
 
@@ -128,8 +128,8 @@ private:
     void execute_info_resource(const cmd_line& cmd);
     void execute_exit(const cmd_line& cmd);
 
-    void build(building& build);
-    std::array<unsigned, 5> get_build_cost(const building& build);
+    void upgrade(building& upgrade);
+    std::array<unsigned, 5> get_build_cost(const building& upgrade);
     building get_building_description(size_t id);
 public:
 
@@ -142,6 +142,7 @@ public:
     void run(void);
 
     void get_resourses(void);
+    void get_build_button_id(void);
     void get_domain_info(void);
     void get_village_info(void);
 
@@ -149,7 +150,8 @@ public:
     void print_domain_info(void);
     void print_village_info(void);
 
-
+    bool check_building(player::building::TYPE type);
+    void build(player::building::TYPE type);
     void run_domain_upgrade_strategy(void);
 
 //	public function map()

@@ -83,6 +83,12 @@ player::player(const keys& info)
     page = con.get_data(server + domain, "POST", arg);
     page = con.get_data(server + domain, "GET", "");
 
+    get_build_button_id();
+    get_domain_info();
+    get_village_info();
+
+//    build(domains[0]);
+
     ///TODO check for login fail
 }
 
@@ -131,6 +137,16 @@ void player::get_resourses(void)
     res.max_storage[IRON] = std::stoul(matcher[3]);
     res.max_storage[WHEAT] = std::stoul(matcher[4]);
 
+}
+
+void player::get_build_button_id(void)
+{
+    page = con.get_data(server + build_id + std::to_string(1), "GET", "");
+
+    const std::string tag = "dorf1.php?a=1&amp;c=";
+    std::string::size_type tag_position = page.find(tag);
+
+    build_button_id = page.substr(tag_position + tag.size(), 6);
 }
 
 //<h1 class="titleInHeader">Железный рудник <span class="level">Уровень 0</span></h1>
@@ -200,35 +216,6 @@ void player::get_village_info(void)
     }
 }
 
-//void player::get_domain_info(void)
-//{
-//    domains.clear();
-
-//    ///TODO пробежать прямо по зданиям от 1 до 18 это будет быстрее
-
-//    std::string map (page.substr(page.find("map name"), page.find("/map") - page.find("map name")));
-
-//    while(map.find(build_id) != std::string::npos)
-//    {
-//        std::string area = map.substr(map.find("<area"), map.find("/>") - map.find("<area"));
-//        std::string::size_type id_m1 = area.find(build_id) + build_id.length();
-//        std::string::size_type id_m2 = area.find("\"", id_m1);
-
-//        building build;
-//        build.id = std::stoul(area.substr(id_m1, id_m2 - id_m1));
-
-//        if(area.find("Лесопилка") != std::string::npos) build.type = building::WOOD;
-//        else if(area.find("Глиняный") != std::string::npos) build.type = building::CLAY;
-//        else if(area.find("Железный") != std::string::npos) build.type = building::IRON;
-//        else if(area.find("Ферма") != std::string::npos) build.type = building::WHEAT;
-
-//        std::string::size_type level = area.find("Уровень ") + std::string("Уровень ").length();
-//        build.level = std::stoul(area.substr(level, 1));
-//        domains.push_back(build);
-//        map = map.substr(map.find("/>") + 2, std::string::npos);
-//    }
-//}
-
 std::ostream& operator<< (std::ostream& st, const player::resourses& res)
 {
     st << "Дерево: " << res.storage[player::RESOURSE::WOOD]
@@ -294,14 +281,8 @@ void player::execute_exit(const cmd_line& cmd)
 
 void player::run(void)
 {
-
-//    get_domain_info();
-//    get_village_info();
-
 //    print_domain_info();
 //    print_village_info();
-
-//    read_config();
 
     std::string line;
 
@@ -319,20 +300,57 @@ void player::run(void)
                 }
                 catch (std::exception& e)
                 {
-//                    std::cout << "[ERROR] Ошибка времени исполнения команды " << cmd.get_cmd() << std::endl;
-//                    if(active_stream != &std::cin)
-//                    {
-//                        active_stream = &std::cin;
-//                        std::cout << "[INFO] ввод переключен на консоль" << std::endl;
-//                    }
                 }
             }
     }
 }
 
+void player::upgrade(building& build)
+{
+    std::string field = build.id < domain_range ? domain : village;
+
+    page = con.get_data(server + field, "GET", "a=" + std::to_string(build.id) + "&c=" + build_button_id);
+}
+
+void player::build(player::building::TYPE type)
+{
+    if (check_building(type))
+      return;
+
+    for (size_t id = domain_range; id < village_range; ++id)
+      if (domains[id].type == player::building::UNBUILD)
+      {
+          page = con.get_data(server + village, "GET", "a=" + std::to_string(id) + "&c=" + build_button_id);
+      }
+}
+
+bool player::check_building(player::building::TYPE type)
+{
+   for (size_t id = domain_range; id < village_range; ++id)
+     if (domains[id].type == type)
+       return true;
+
+   return false;
+}
 
 void player::run_domain_upgrade_strategy(void)
 {
+    get_resourses();
+
+    ///check storage existance
+    if (!check_building(player::building::STORAGE))
+    {
+        build(player::building::STORAGE);
+    }
+
+    ///check storage existance
+    if (!check_building(player::building::STORAGE))
+    {
+        build(player::building::STORAGE);
+    }
+
+
+
 //    std::priority_queue<area_info> build_queue;
 //    for(area_info area: areas)
 //        build_queue.push(area);
