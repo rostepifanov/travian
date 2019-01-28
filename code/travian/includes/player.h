@@ -3,156 +3,71 @@
 
 #include <string>
 #include <array>
+#include <map>
 #include <vector>
 #include <iostream>
 #include "connection.h"
 #include "cmd_line.h"
+#include "defs.structs.h"
+#include "defs.game.h"
 
 class player
 {
 public:
-    enum RESOURSE
+    class build_button
     {
-        WOOD = 0,
-        CLAY = 1,
-        IRON = 2,
-        WHEAT = 3,
-        CONSUMPTION = 4
+        bool is_valid = false;
+        std::string key = "000000";
+    public:
+        const std::string & operator () (void) { is_valid = false; return key; }
+        void set(const std::string & key) { is_valid = true; this->key = key; }
+        bool valid(void) { return is_valid; }
     };
 
-    struct building
-    {
-        enum TYPE
-        {
-            LUMBER = 0,
-            CLAY_QUARRY,
-            IRON_MINE,
-            FARM,
-            MAIN,
-            HIDE,
-            MILL,
-            SAWMILL,
-            BRICKYARD,
-            IRON_FOUNDRY,
-            BAKERY,
-            STORAGE,
-            BARN,
-            EMBASSY,
-            MARKET,
-            RESIDENCE,
-            PALACE,
-            MASON,
-            TREASURE,
-            WATER,
-            TOWN_HALL,
-            BOARD_TRADE,
-            BIG_BRAN,
-            BIG_STORAGE,
-            ASSEMBLY_POINT,
-            WALL,
-            TAVERN,
-            ACADEMY,
-            SMITHY,
-            STABLE,
-            WORKSHOP,
-            ARENA,
-            UNBUILD
-        };
-
-        static const std::vector<std::string>types;
-
-        enum TYPE type = UNBUILD;
-        unsigned level = 0;
-        unsigned id = 0;
-    };
-
-    struct keys
-    {
-        std::string server;
-        std::string login;
-        std::string password;
-
-        keys(const std::string& server, const std::string& login, const std::string& password) : server(server), login(login), password(password) { }
-    };
-
-    struct resourses
-    {
-        std::array<unsigned, 4> storage;
-        std::array<unsigned, 5> production;
-        std::array<unsigned, 4>  max_storage;
-    };
-
-
-//    struct event
-//    {
-//        enum TYPE
-//        {
-//            CHECK,
-//            BUILD
-//        };
-
-//        typedef void (*function)();
-
-//        enum TYPE type;
-
-//    };
-private:
+    ///TODO private
+public:
     const std::string login = "login.php";
     const std::string domain = "dorf1.php";
     const std::string village = "dorf2.php";
     const std::string build_id ="build.php?id=";
 
     connection con;
-
     std::string page;
-
     std::string server;
 
-    std::array<building, 40> domains;
+    std::array<defs::building, 40> domains;
     const size_t domain_range = 18;
     const size_t village_range = 40;
 
-    resourses res;
-    std::string build_button_id;
+    defs::resources res;
+    build_button button;
 
-    typedef void (player::*execute)(const cmd_line&);
-
-    struct cmd_info
-    {
-        std::string cmd;
-        execute func;
-    };
-
-    static std::vector<cmd_info> cmds;
-
-    void execute_info_resource(const cmd_line& cmd);
-    void execute_exit(const cmd_line& cmd);
-
-    void upgrade(building& upgrade);
-    std::array<unsigned, 5> get_build_cost(const building& upgrade);
-    building get_building_description(size_t id);
+    void upgrade(defs::building& build);
+    bool get_valid_build_button(void);
+    std::array<unsigned, 5> get_build_cost(const defs::building& type);
+    defs::building get_building_description(size_t id);
 public:
 
-    player(const keys& info);
+    player(const defs::keys& info);
 
     ~player() { }
 
-
-
     void run(void);
 
+    bool get_construct_status(void);
     void get_resourses(void);
-    void get_build_button_id(void);
     void get_domain_info(void);
     void get_village_info(void);
-
 
     void print_domain_info(void);
     void print_village_info(void);
 
-    bool check_building(player::building::TYPE type);
-    void build(player::building::TYPE type);
+    bool check_building(defs::BUILD_TYPE type);
+    void build(defs::BUILD_TYPE type);
     void run_domain_upgrade_strategy(void);
+};
+
+//std::ostream& operator << (std::ostream& st, const defs::building& build);
 
 //	public function map()
 //	{
@@ -189,27 +104,7 @@ public:
 //		return $this->parse_square($did, $content);
 //		return $return;
 //	}
-//	/**
-//	 * Create a building
-//	 *
-//	 * @param int $pos build.php?id=
-//	 * @param int $bid dorf2.php?a=
-//	 * @param int $cid dorf2.php?c=
-//	 */
-//	public function create_building($pos, $bid, $cid='')
-//	{
-//		if( !$this->connected )
-//		{
-//			throw new Exception('Can\'t access this page until you are connected');
-//		}
-//		// If $c is not given, found it !
-//		if( strlen($c) == 0 )
-//		{
-//			$c = $this->get_building_key($pos);
-//		}
-//		// Check if the building can be build and if, http://s5.travian.fr/dorf2.php?a=10&id=29&c=38b
-//		// get 2 times the same page...
-//	}
+
 //	/******* Parse Functions ************/
 //	/**
 //	 * Parse a square and return informations about it
@@ -244,17 +139,6 @@ public:
 //		$content = $this->handle->get_url_content($this->server_host.'karte.php?z='.$z);
 
 //		preg_match('#d='.$z.'&c=([a-f0-9]+)#', $content, $match);
-//		return $match[1];
-//	}
-//	/**
-//	 * Get the key to build a building
-//	 *
-//	 * @param int $pos Identifier of the place to build
-//	 */
-//	private function get_building_key($pos)
-//	{
-//		$content = $this->handle->get_url_content($this->server_host.'build.php?id='.$pos);
-//		preg_match('#id='.$pos.'&c=([a-f0-9]{3})#', $content, $match);
 //		return $match[1];
 //	}
 //	// By the picture always works. By table don't work when the square is occuped
@@ -350,6 +234,6 @@ public:
 //    }
 //}
 
-};
+
 
 #endif // PLAYER_H

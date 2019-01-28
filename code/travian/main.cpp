@@ -1,9 +1,9 @@
-#include "player.h"
+#include "app.h"
 #include <curl/curl.h>
 
 int main(void)
 {
-    player p(player::keys("https://ts19.travian.ru/", "repifanov","12345678"));
+    player p(defs::keys("https://ts19.travian.ru/", "repifanov","12345678"));
 
-    p.run();
+    app::get_instance().run(p);
 }
