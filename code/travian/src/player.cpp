@@ -15,14 +15,15 @@ player::player(const defs::keys& info)
 
     ///TODO set up regex search
 
-    long int t = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count() - 30;
+    auto current_time = std::chrono::system_clock::now().time_since_epoch();
+    long int delta_t = std::chrono::duration_cast<std::chrono::seconds>(current_time).count() - 30;
 
     std::string arg =
             "name=" + info.login +
             "&password=" + info.password +
             "&s1=%D0%92%D0%BE%D0%B9%D1%82%D0%B8"
             "&w=1920%3A1080"    // Size of the screen (imagine 1440x900)
-            "&login=" + std::to_string(t) +
+            "&login=" + std::to_string(delta_t) +
             "&lowRes=0";
 
     page = con.get_data(server + domain, "POST", arg);
@@ -31,7 +32,7 @@ player::player(const defs::keys& info)
     ///TODO check for login fail
 }
 
-void player::get_resourses(void)
+void player::update_resourses(void)
 {
     page = con.get_data(server + domain, "GET", "");
 
@@ -61,7 +62,6 @@ void player::get_resourses(void)
 
     res.resource["production"][defs::CONSUMPTION] = res.resource["storage"][defs::CONSUMPTION];
     res.resource["maxStorage"][defs::CONSUMPTION] = res.resource["storage"][defs::CONSUMPTION];
-
 }
 
 bool player::get_valid_build_button(void)
@@ -228,7 +228,7 @@ bool player::check_building(defs::BUILD_TYPE type)
 
 void player::run_domain_upgrade_strategy(void)
 {
-    get_resourses();
+    update_resourses();
 
     ///check storage existance
     if (!check_building(defs::STORAGE))

@@ -55,7 +55,7 @@ public:
     void run(void);
 
     bool get_construct_status(void);
-    void get_resourses(void);
+    void update_resourses(void);
     void get_domain_info(void);
     void get_village_info(void);
 

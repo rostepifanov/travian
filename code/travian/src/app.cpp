@@ -14,7 +14,7 @@ app& app::get_instance(void)
 
 void app::execute_info_resource(const cmd_line& cmd)
 {
-    p->get_resourses();
+    p->update_resourses();
     std::cout << p->res << std::endl;
 }
 
