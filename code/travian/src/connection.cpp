@@ -7,9 +7,10 @@ connection::connection()
 
     set_cookie();
 
+    curl_easy_setopt(handle, CURLOPT_HEADERFUNCTION, callback);
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, callback);
 
-    curl_easy_setopt(handle, CURLOPT_HEADER, true);
+    curl_easy_setopt(handle, CURLOPT_HEADER, false);
     curl_easy_setopt(handle, CURLOPT_NOBODY, false);
     curl_easy_setopt(handle, CURLOPT_USERAGENT, user_agent.c_str());
     curl_easy_setopt(handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
@@ -47,13 +48,15 @@ std::string connection::get_data(const std::string& url, const std::string& meth
     curl_easy_setopt(handle, CURLOPT_REFERER, request.c_str());
     curl_easy_setopt(handle, CURLOPT_URL, request.c_str());
 
-    std::string data;
-    curl_easy_setopt(handle, CURLOPT_WRITEDATA, &data);
+    std::string head;
+    std::string body;
+    curl_easy_setopt(handle, CURLOPT_HEADERDATA, &head);
+    curl_easy_setopt(handle, CURLOPT_WRITEDATA, &body);
     curl_easy_perform(handle);
 
     ++request_count;
 
-    return data;
+    return body;
 }
 
 size_t connection::callback(char *data, size_t size, size_t nmemb, std::string *buffer)

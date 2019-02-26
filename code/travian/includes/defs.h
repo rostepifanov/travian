@@ -7,7 +7,6 @@
 #include <sstream>
 
 
-
 namespace defs
 {
     /*!
