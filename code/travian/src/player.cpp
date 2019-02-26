@@ -88,62 +88,117 @@ bool player::get_construct_status(void)
     return page.find(duration) != std::string::npos;
 }
 
+
 //<h1 class="titleInHeader">Железный рудник <span class="level">Уровень 0</span></h1>
 defs::building player::get_building_description(size_t id)
 {
     page = con.get_data(server + build_id + std::to_string(id), "GET", "");
 
-    const std::string h1_opened = "<h1 class=\"titleInHeader\">";
-    const std::string h1_closed = "</h1>";
-    const std::string span_opened = " <span\n\t\tclass=\"level\">";
-    const std::string span_closed = "</span>";
-    const std::string level = "Уровень ";
-
-    std::string::size_type h1_begin = page.find(h1_opened);
-    std::string::size_type h1_end = page.find(h1_closed, h1_begin);
-
-    std::string info (page.substr(h1_begin, h1_end - h1_begin));
-
-    std::string::size_type span_begin = info.find(span_opened);
-    std::string::size_type span_end = info.find(span_closed);
-
-    std::string name;
-    std::string level_id;
+    html html_page(page);
 
     defs::building build;
 
-    if (span_begin != std::string::npos)
+    for(html::iterator<h1> it = html_page.begin<h1>(); it != html_page.end<h1>(); ++it)
     {
-        name = info.substr(h1_opened.size(), span_begin - h1_opened.size());
-        level_id = info.substr(span_begin + span_opened.size() + level.size(), span_end - (span_begin + span_opened.size() + level.size()));
-        build.level = std::stoul(level_id);
+        if (it.has_attribute("class") && it.get_attribute("class") == "titleInHeader")
+        {
+            std::string name;
+            std::string level_id;
+
+
+            const std::string span_opened = " <span\n\t\tclass=\"level\">";
+            const std::string level = "Уровень ";
+
+
+            if (it.has_node("span"))
+            {
+                std::string info = *(it.get_node<span>());
+                level_id = info.substr(level.size(), info.size() - level.size());
+                build.level = std::stoul(level_id);
+
+                std::string::size_type span_begin = (*it).find(span_opened);
+                name = (*it).substr(0, span_begin);
+            }
+            else
+            {
+                name = *it;
+            }
+
+            build.id = id;
+
+            for (int i = 0; i < defs::building::types.size(); ++i)
+              if (name == defs::building::types[i])
+              {
+                build.type = defs::BUILD_TYPE(i);
+                break;
+              }
+        }
     }
-    else
-    {
-        name = info.substr(h1_opened.size());
-    }
-
-//    defs::clear(name, ' ');
-
-    build.id = id;
-
-    for (int i = 0; i < defs::building::types.size(); ++i)
-      if (name == defs::building::types[i])
-      {
-        build.type = defs::BUILD_TYPE(i);
-        break;
-      }
 
     return std::move(build);
 }
 
+////<h1 class="titleInHeader">Железный рудник <span class="level">Уровень 0</span></h1>
+//defs::building player::get_building_description(size_t id)
+//{
+//    page = con.get_data(server + build_id + std::to_string(id), "GET", "");
+
+//    const std::string h1_opened = "<h1 class=\"titleInHeader\">";
+//    const std::string h1_closed = "</h1>";
+//    const std::string span_opened = " <span\n\t\tclass=\"level\">";
+//    const std::string span_closed = "</span>";
+//    const std::string level = "Уровень ";
+
+//    std::string::size_type h1_begin = page.find(h1_opened);
+//    std::string::size_type h1_end = page.find(h1_closed, h1_begin);
+
+//    std::string info (page.substr(h1_begin, h1_end - h1_begin));
+
+//    std::string::size_type span_begin = info.find(span_opened);
+//    std::string::size_type span_end = info.find(span_closed);
+
+//    std::string name;
+//    std::string level_id;
+
+//    defs::building build;
+
+//    if (span_begin != std::string::npos)
+//    {
+//        name = info.substr(h1_opened.size(), span_begin - h1_opened.size());
+//        level_id = info.substr(span_begin + span_opened.size() + level.size(), span_end - (span_begin + span_opened.size() + level.size()));
+//        build.level = std::stoul(level_id);
+//    }
+//    else
+//    {
+//        name = info.substr(h1_opened.size());
+//    }
+
+////    defs::clear(name, ' ');
+
+//    build.id = id;
+
+//    for (int i = 0; i < defs::building::types.size(); ++i)
+//      if (name == defs::building::types[i])
+//      {
+//        build.type = defs::BUILD_TYPE(i);
+//        break;
+//      }
+
+//    return std::move(build);
+//}
+
 void player::get_domain_info(void)
 {
+    auto current_time = std::chrono::system_clock::now().time_since_epoch();
+
     for (size_t i = 0; i < domain_range; ++i)
     {
         domains[i] = get_building_description(i + 1);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
+
+    std::cout << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count()
+                 - std::chrono::duration_cast<std::chrono::seconds>(current_time).count();
 }
 
 void player::get_village_info(void)

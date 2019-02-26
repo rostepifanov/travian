@@ -10,6 +10,11 @@
 #include "cmd_line.h"
 #include "defs.structs.h"
 #include "defs.game.h"
+#include "html.h"
+
+const char h1[] = "h1";
+const char span[] = "span";
+
 
 class player
 {

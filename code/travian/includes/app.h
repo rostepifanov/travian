@@ -21,6 +21,7 @@ class app
 
     static std::vector<cmd_info> cmds;
 
+    void execute_test(const cmd_line& cmd);
     void execute_info_resource(const cmd_line& cmd);
     void execute_exit(const cmd_line& cmd);
 

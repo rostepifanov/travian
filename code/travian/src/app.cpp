@@ -2,6 +2,7 @@
 
 std::vector<app::cmd_info> app::cmds =
 {
+    {"test", &app::execute_test},
     {"resource", &app::execute_info_resource},
     {"exit", &app::execute_exit}
 };
@@ -16,6 +17,13 @@ void app::execute_info_resource(const cmd_line& cmd)
 {
     p->update_resourses();
     std::cout << p->res << std::endl;
+}
+
+void app::execute_test(const cmd_line& cmd)
+{
+    p->get_domain_info();
+    p->print_domain_info();
+//    std::cout << p->res << std::endl;
 }
 
 void app::execute_exit(const cmd_line& cmd)
@@ -36,15 +44,15 @@ void app::run(player& p)
         for(cmd_info info : cmds)
             if(info.cmd == cmd.get_cmd())
             {
-                try
-                {
+//                try
+//                {
                     (*this.*(info.func))(cmd);
                     break;
-                }
-                catch (std::exception& e)
-                {
-                    std::cout << "Oops!" << std::endl;
-                }
+//                }
+//                catch (std::exception& e)
+//                {
+//                    std::cout << "Oops!" << std::endl;
+//                }
             }
     }
 }

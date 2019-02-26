@@ -15,56 +15,73 @@ class html
 public:
     html(const std::string& content) { page.parse<0>(const_cast<char*>(content.c_str())); }
 
-    template <const std::string& type>
+    template <const char* type>
     class iterator
-    {
+    {public:
         rapidxml::node_iterator<char> it;
-        iterator(const html& html) : it (html.page.first_node(type.c_str())) { }
-
-        bool has(const std::string& attribute)
+        iterator(xml_node<char>* ptr = nullptr) : it (ptr) { }
+        iterator(const html& html) : it (html.page.first_node(type)) { }
+    public:
+        bool has_attribute(const std::string& attribute)
         {
             return it->first_attribute(attribute.c_str());
         }
 
-        std::string value(const std::string& attribute, unsigned order = 0)
+        std::string get_attribute(const std::string& attribute, unsigned order = 0)
         {
-            rapidxml::xml_attribute<char> * node = it->first_attribute(attribute.c_str());
+            rapidxml::xml_attribute<char> * pointer = it->first_attribute(attribute.c_str());
 
-            while (order-- && node->next_attribute())
-              node->next_attribute();
+            while (order-- && pointer->next_attribute())
+              pointer->next_attribute();
 
-            return node->value();
+            return pointer->value();
         }
 
-        iterator& operator++() { ++it; return *this; }
+        bool has_node(const std::string& node)
+        {
+            return it->first_node(node.c_str());
+        }
 
+        template <const char* node>
+        iterator<node> get_node(unsigned order = 0)
+        {
+            rapidxml::xml_node<char> * pointer = it->first_node(node);
 
+            while (order-- && pointer->next_sibling())
+              pointer->next_sibling();
 
-            //            node = html.first_node(type);
-//                // Iterate over the brewerys
+            return iterator<node>(pointer);
+        }
+
+        iterator& operator++ () { ++it; return *this; }
+
+        bool operator== (const iterator& right) { return it == right.it; }
+
+        bool operator!= (const iterator& right) { return it != right.it; }
+
+        std::string operator* () const
+        {
+            assert(it->value());
+            return std::string(it->value());
+        }
 //                for (xml_node<> * brewery_node = root_node->first_node("Brewery"); brewery_node; brewery_node = brewery_node->next_sibling())
-//                {
-//                    printf("I have visited %s in %s. ",
-//                        brewery_node->first_attribute("name")->value(),
 //                        brewery_node->first_attribute("location")->value());
-//                        // Interate over the beers
 //                    for(xml_node<> * beer_node = brewery_node->first_node("Beer"); beer_node; beer_node = beer_node->next_sibling())
-//                    {
-//                        printf("On %s, I tried their %s which is a %s. ",
 //                            beer_node->("dateSampled")->value(),
 //                            beer_node->first_attribute("name")->value(),
-//                            beer_node->first_attribute("description")->value());
-//                        printf("I gave it the following review: %s", beer_node->value());
-//                    }
 
-//                }
+//        bool has(const std::string& attribute)
+//        {
 
-
-        bool has(const std::string& attribute)
-        {
-
-        }
+//        }
     };
+
+    template <const char* type>
+    iterator<type> begin() { return iterator<type>(*this); }
+
+    template <const char* type>
+    iterator<type> end() { iterator<type> it; return iterator<type>(*this); }
+
 };
 
 #endif // HTML_H
