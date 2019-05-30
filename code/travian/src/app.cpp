@@ -44,15 +44,15 @@ void app::run(player& p)
         for(cmd_info info : cmds)
             if(info.cmd == cmd.get_cmd())
             {
-//                try
-//                {
+                try
+                {
                     (*this.*(info.func))(cmd);
                     break;
-//                }
-//                catch (std::exception& e)
-//                {
-//                    std::cout << "Oops!" << std::endl;
-//                }
+                }
+                catch (std::exception& e)
+                {
+                    std::cout << "Oops!" << std::endl;
+                }
             }
     }
 }

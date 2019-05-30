@@ -10,11 +10,7 @@
 #include "cmd_line.h"
 #include "defs.structs.h"
 #include "defs.game.h"
-#include "html.h"
-
-const char h1[] = "h1";
-const char span[] = "span";
-
+#include "defs.h"
 
 class player
 {
@@ -36,6 +32,7 @@ public:
     const std::string village = "dorf2.php";
     const std::string build_id ="build.php?id=";
 
+    CDocument html;
     connection con;
     std::string page;
     std::string server;
@@ -49,7 +46,7 @@ public:
 
     void upgrade(defs::building& build);
     bool get_valid_build_button(void);
-    std::array<unsigned, 5> get_build_cost(const defs::building& type);
+    defs::uvector<5> get_build_cost(const defs::building& type);
     defs::building get_building_description(size_t id);
 public:
 

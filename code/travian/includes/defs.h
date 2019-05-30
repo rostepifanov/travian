@@ -6,6 +6,14 @@
 #include <vector>
 #include <sstream>
 
+#include "gumbo/Document.h"
+#include "gumbo/Node.h"
+#include "gumbo/Object.h"
+#include "gumbo/Parser.h"
+#include "gumbo/QueryUtil.h"
+#include "gumbo/Selection.h"
+#include "gumbo/Selector.h"
+
 
 namespace defs
 {

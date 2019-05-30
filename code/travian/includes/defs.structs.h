@@ -40,6 +40,14 @@ namespace defs
             return std::equal(this->begin(), this->end(), right.begin(),
                        [](const type& left, const type& right) { return left == right; });
         }
+
+        friend std::ostream& operator << (std::ostream& stream, const defs::vector<type, size>& data)
+        {
+            for (unsigned i = 0; i < size; ++i)
+              stream << data[i] << " ";
+
+            return stream;
+        }
     };
 
     template <unsigned size>

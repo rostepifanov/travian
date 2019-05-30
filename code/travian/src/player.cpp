@@ -29,7 +29,12 @@ player::player(const defs::keys& info)
     page = con.get_data(server + domain, "POST", arg);
     page = con.get_data(server + domain, "GET", "");
 
+//    html.parse(page);
+
+//    CSelection div = html.find("div[class='error']");
+
     ///TODO check for login fail
+    ///
 }
 
 void player::update_resourses(void)
@@ -93,62 +98,45 @@ defs::building player::get_building_description(size_t id)
 {
     page = con.get_data(server + build_id + std::to_string(id), "GET", "");
 
-    const std::string h1_opened = "<h1 class=\"titleInHeader\">";
-    const std::string h1_closed = "</h1>";
-    const std::string span_opened = " <span\n\t\tclass=\"level\">";
-    const std::string span_closed = "</span>";
-    const std::string level = "Уровень ";
+    html.parse(page);
 
-    std::string::size_type h1_begin = page.find(h1_opened);
-    std::string::size_type h1_end = page.find(h1_closed, h1_begin);
+    //поиск всех h1 c titleInHeader
+    CSelection h1 = html.find("h1[class='titleInHeader']");
 
-    std::string info (page.substr(h1_begin, h1_end - h1_begin));
-
-    std::string::size_type span_begin = info.find(span_opened);
-    std::string::size_type span_end = info.find(span_closed);
-
-    std::string name;
-    std::string level_id;
+    ///TODO check if node more than one
 
     defs::building build;
-
-    if (span_begin != std::string::npos)
-    {
-        name = info.substr(h1_opened.size(), span_begin - h1_opened.size());
-        level_id = info.substr(span_begin + span_opened.size() + level.size(), span_end - (span_begin + span_opened.size() + level.size()));
-        build.level = std::stoul(level_id);
-    }
-    else
-    {
-        name = info.substr(h1_opened.size());
-    }
-
-//    defs::clear(name, ' ');
-
     build.id = id;
 
+    std::string name = h1.nodeAt(0).ownText();
+
     for (int i = 0; i < defs::building::types.size(); ++i)
-      if (name == defs::building::types[i])
+      if (name.find(defs::building::types[i]) != std::string::npos)
       {
         build.type = defs::BUILD_TYPE(i);
         break;
       }
+
+    CSelection span = h1.nodeAt(0).find("span");
+    if (span.nodeNum())
+    {
+        const std::string level_text = "Уровень ";
+        std::string level;
+        level = span.nodeAt(0).text();
+        level = level.substr(level_text.size());
+        build.level = std::stoul(level);
+    }
 
     return std::move(build);
 }
 
 void player::get_domain_info(void)
 {
-    auto current_time = std::chrono::system_clock::now().time_since_epoch();
-
     for (size_t i = 0; i < domain_range; ++i)
     {
         domains[i] = get_building_description(i + 1);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
-
-    std::cout << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count()
-                 - std::chrono::duration_cast<std::chrono::seconds>(current_time).count();
 }
 
 void player::get_village_info(void)
@@ -172,27 +160,17 @@ void player::print_village_info(void)
         std::cout << domains[id] << std::endl;
 }
 
-std::array<unsigned, 5> player::get_build_cost(const defs::building& build)
+defs::uvector<5> player::get_build_cost(const defs::building& build)
 {
-    std::array<unsigned, 5> cost;
+    defs::uvector<5> cost;
 
     page = con.get_data(server + build_id + std::to_string(build.id), "GET", "");
+    html.parse(page);
 
-    const std::string name = "contractCosts";
+    CSelection resources = html.find("div[class='resourceWrapper']").find("span[class='value']");
 
-    std::string div = page.substr(page.find(name) - 50, 900);
-
-    const std::string resource = "resources r";
-
-    const std::string span = "</span>";
-
-    for(int type = 1; type < 6; ++type)
-    {
-        std::string::size_type pos = div.find(resource + std::to_string(type));
-        pos += div.substr(pos, std::string::npos).find(span);
-        std::string::size_type pos1 = div.substr(0, pos).find_last_of(">");
-        cost[defs::BUILD_TYPE(type)] = std::stoul(div.substr(pos1 + 1, pos - pos1));
-    }
+    for (int i = 0; i < resources.nodeNum(); ++i)
+      cost[i] = std::stoul(resources.nodeAt(i).text());
 
     return std::move(cost);
 }
@@ -246,6 +224,7 @@ void player::run_domain_upgrade_strategy(void)
     {
         build(defs::BARN);
     }
+
 
 
 }
