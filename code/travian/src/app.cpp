@@ -16,14 +16,16 @@ app& app::get_instance(void)
 void app::execute_info_resource(const cmd_line& cmd)
 {
     p->update_resourses();
-    std::cout << p->res << std::endl;
+    std::cout << p->get_resoursces() << std::endl;
 }
 
 void app::execute_test(const cmd_line& cmd)
 {
-    p->get_domain_info();
-    p->print_domain_info();
+//    p->get_domain_info();
+//    p->print_domain_info();
 //    std::cout << p->res << std::endl;
+    p ->run_domain_upgrade_strategy();
+//    std::cout << p->get_construct_status();
 }
 
 void app::execute_exit(const cmd_line& cmd)

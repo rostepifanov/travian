@@ -6,11 +6,21 @@
 #include <map>
 #include <vector>
 #include <iostream>
+#include <exception>
 #include "connection.h"
 #include "cmd_line.h"
 #include "defs.structs.h"
 #include "defs.game.h"
 #include "defs.h"
+
+class LoginException : public std::exception
+{
+    std::string msg;
+public:
+    LoginException(const defs::keys& info) : msg("Incorrect login-password " + info.login + " " + info.password) { }
+
+    const char * what() const throw() { return msg.c_str(); }
+};
 
 class player
 {
@@ -25,8 +35,7 @@ public:
         bool valid(void) { return is_valid; }
     };
 
-    ///TODO private
-public:
+private:
     const std::string login = "login.php";
     const std::string domain = "dorf1.php";
     const std::string village = "dorf2.php";
@@ -41,13 +50,20 @@ public:
     const size_t domain_range = 18;
     const size_t village_range = 40;
 
-    defs::resources res;
+    defs::resources resource;
     build_button button;
 
+    bool operation_continue = false;
+
     void upgrade(defs::building& build);
-    bool get_valid_build_button(void);
-    defs::uvector<5> get_build_cost(const defs::building& type);
+    bool get_valid_build_button(size_t ids);
+    std::string get_building_construct_code(defs::BUILD_TYPE type, size_t place_id);
+    size_t get_empty_place_id();
+    defs::ivector<5> get_building_build_cost(const defs::BUILD_TYPE type);
+    defs::ivector<5> get_building_upgrade_cost(const defs::building& build);
     defs::building get_building_description(size_t id);
+
+    size_t get_resource_gathering_time(const defs::ivector<5>& required);
 public:
 
     player(const defs::keys& info);
@@ -56,10 +72,12 @@ public:
 
     void run(void);
 
-    bool get_construct_status(void);
+    size_t get_construct_status(void);
     void update_resourses(void);
     void get_domain_info(void);
     void get_village_info(void);
+    void get_building_info(int i);
+    defs::resources get_resoursces(void) const;
 
     void print_domain_info(void);
     void print_village_info(void);

@@ -32,7 +32,51 @@ namespace defs
         bool operator <= (const defs::vector<type, size>& right) const
         {
             return std::equal(this->begin(), this->end(), right.begin(),
-                       [](const type& left, const type& right) { return left <= right; });
+                              [](const type& left, const type& right)
+                                  { return left <= right; }
+            );
+        }
+
+        bool operator < (const defs::vector<type, size>& right) const
+        {
+            return std::equal(this->begin(), this->end(), right.begin(),
+                              [](const type& left, const type& right)
+                                  { return left < right; }
+            );
+        }
+
+        bool operator >= (const defs::vector<type, size>& right) const
+        {
+            return std::equal(this->begin(), this->end(), right.begin(),
+                              [](const type& left, const type& right)
+                                  { return left >= right; }
+            );
+        }
+
+        bool operator > (const defs::vector<type, size>& right) const
+        {
+            return std::equal(this->begin(), this->end(), right.begin(),
+                              [](const type& left, const type& right)
+                                  { return left > right; }
+            );
+        }
+
+        defs::vector<type, size> operator - (const defs::vector<type, size>& right) const
+        {
+            vector<type, size> substracted;
+
+            std::transform(this->begin(), this->end(), right.begin(), substracted.begin(),
+                           [](const type& left, const type& right)
+                               { return left - right; }
+            );
+
+            return substracted;
+        }
+
+        std::pair<unsigned, type> max () const
+        {
+            auto max_it = std::max_element(this->begin(), this->end());
+            return std::make_pair(std::distance(this->begin(), max_it), *max_it);
         }
 
         bool operator == (const defs::vector<type, size>& right) const
@@ -52,6 +96,9 @@ namespace defs
 
     template <unsigned size>
     using uvector = vector<unsigned, size>;
+
+    template <unsigned size>
+    using ivector = vector<int, size>;
 
     template <unsigned size>
     using dvector = vector<double, size>;

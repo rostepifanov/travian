@@ -67,29 +67,47 @@ namespace defs
             return st;
         }
 
+        friend bool order (const building& left, const building& right);
+
         enum BUILD_TYPE type = UNBUILD;
         unsigned level = 0;
         unsigned id = 0;
     };
 
+    struct simple_order
+    {
+        bool operator () (const building& left, const building& right)
+        {
+            return left.level >= right.level;
+        }
+    };
+
+    struct barn_storage_priority_order
+    {
+        bool operator () (const building& left, const building& right)
+        {
+            return right.type == defs::BUILD_TYPE::BARN || right.type == defs::BUILD_TYPE::STORAGE || left.level > right.level;
+        }
+    };
+
     struct resources
     {
-        std::map<std::string, defs::uvector<5>> resource;
+        std::map<std::string, defs::ivector<5>> data;
 
         static const std::vector<std::string> types;
 
         resources ()
         {
             for (std::string type : types)
-              resource[type];
+              data[type];
         }
 
-        friend std::ostream& operator << (std::ostream& st, const defs::resources& res)
+        friend std::ostream& operator << (std::ostream& st, const defs::resources& obj)
         {
-            st << "Дерево: " << res.resource.at("storage")[defs::WOOD]
-               << ", глина: " << res.resource.at("storage")[defs::CLAY]
-               << ", железо: " << res.resource.at("storage")[defs::IRON]
-               << ", зерно: " << res.resource.at("storage")[defs::WHEAT];
+            st << "Дерево: " << obj.data.at("storage")[defs::WOOD]
+               << ", глина: " << obj.data.at("storage")[defs::CLAY]
+               << ", железо: " << obj.data.at("storage")[defs::IRON]
+               << ", зерно: " << obj.data.at("storage")[defs::WHEAT];
             return st;
         }
     };

@@ -89,16 +89,14 @@ namespace defs
      */
     inline bool is_integer(const std::string& str)
     {
-        return (std::isdigit(str[0]) || str[0] == '-') && std::all_of(str.begin() + 1, str.end(), [](char c){return std::isdigit(c);});
-    }
+        for (int i = 0; i < str.size(); ++i)
+        {
+            char cur = str[i];
+            if ( ! (std::isdigit(cur) || (cur == '-' && i == 0) ) )
+              return false;
+        }
 
-    /*!
-     * \brief Проверяет является ли строка дробным числом
-     * \param str строка для проверки
-     */
-    inline bool is_double(const std::string& str)
-    {
-        return (std::isdigit(str[0]) || str[0] == '-') && std::all_of(str.begin() + 1, str.end(), [](char c){return std::isdigit(c) || c == '.';});
+        return true && ! str.empty();
     }
 }
 
