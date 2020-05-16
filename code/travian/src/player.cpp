@@ -8,6 +8,7 @@
 #include <iomanip>
 #include "defs.game.h"
 
+#include <iostream>
 player::player(const defs::keys& info)
 {
     server = info.server;
@@ -27,7 +28,7 @@ player::player(const defs::keys& info)
             "&login=" + std::to_string(delta_t) +
             "&lowRes=0";
 
-    page = con.get_data(server + domain, "POST", arg);
+    page = con.get_data(server + login, "POST", arg);
     page = con.get_data(server + domain, "GET", "");
 
     html.parse(page);
@@ -109,18 +110,17 @@ size_t player::get_construct_status(void)
     if (time.size() == 7)
       time = "0" + time;
 
-    std::tm parsed_time = {};
-    std::stringstream(time) >> std::get_time(&parsed_time, "%T");
+    std::tm parsed_time = { 0 };
+    std::istringstream stream (time);
+    stream >> std::get_time(&parsed_time, "%T");
     size_t duration = 3600 * parsed_time.tm_hour + 60 * parsed_time.tm_min + parsed_time.tm_sec;
 
     return duration;
 }
 
-//<h1 class="titleInHeader">Железный рудник <span class="level">Уровень 0</span></h1>
 defs::building player::get_building_description(size_t id)
 {
     page = con.get_data(server + build_id + std::to_string(id), "GET", "");
-
     html.parse(page);
 
     //поиск всех h1 c titleInHeader
@@ -177,18 +177,6 @@ void player::get_building_info(int i)
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
-void player::print_domain_info(void)
-{
-    for(size_t id = 0; id < domain_range; ++id)
-        std::cout << domains[id] << std::endl;
-}
-
-void player::print_village_info(void)
-{
-    for(size_t id = domain_range; id < village_range; ++id)
-        std::cout << domains[id] << std::endl;
-}
-
 size_t player::get_empty_place_id()
 {
     size_t place_id = 0;
@@ -205,6 +193,8 @@ size_t player::get_empty_place_id()
 
 defs::ivector<5> player::get_building_build_cost(const defs::BUILD_TYPE type)
 {
+    /// TODO different category
+
     defs::ivector<5> cost;
 
     size_t place_id = get_empty_place_id();
@@ -232,14 +222,16 @@ defs::ivector<5> player::get_building_build_cost(const defs::BUILD_TYPE type)
 
 defs::ivector<5> player::get_building_upgrade_cost(const defs::building& build)
 {
-    defs::ivector<5> cost;
+    if (build.type == defs::UNBUILD)
+        return defs::ivector<5>();
+
 
     page = con.get_data(server + build_id + std::to_string(build.id), "GET", "");
     html.parse(page);
 
     CSelection resources = html.find("div[class='contractWrapper']").find("span[class='value value']");
 
-    /// TODO incorrect behavior if resource unaviable
+    defs::ivector<5> cost;
 
     for (int i = 0; i < resources.nodeNum(); ++i)
       cost[i] = std::stoul(resources.nodeAt(i).text());
@@ -253,13 +245,14 @@ void player::upgrade(defs::building& build)
 
     get_valid_build_button(build.id);
 
-//    std::cout <<  "a=" + std::to_string(build.id) + "&c=" + button() << std::endl;
     page = con.get_data(server + field, "GET", "a=" + std::to_string(build.id) + "&c=" + button());
 }
 
 
 std::string player::get_building_construct_code(defs::BUILD_TYPE type, size_t place_id)
 {
+    /// TODO different category
+
     page = con.get_data(server + build_id +  std::to_string(place_id), "GET", "");
 
     html.parse(page);
@@ -395,21 +388,20 @@ void player::run_domain_upgrade_strategy(void)
         size_t time;
         while(time = get_resource_gathering_time(cost))
         {
-            std::cout << "Gathering " << time << std::endl;
+            std::cout << "Gathering " << time << " to " << defs::building::types[upgradable.type] << std::endl;
             std::this_thread::sleep_for(std::chrono::seconds(std::min(time, size_t(600))));
         }
 
-        std::cout << defs::building::types[upgradable.type] << std::endl;
         upgrade(upgradable);
 
         while (time = get_construct_status())
         {
-            std::cout << "Building " << time << std::endl;
+            std::cout << "Building " << time << " to " << defs::building::types[upgradable.type] << std::endl;
             std::this_thread::sleep_for(std::chrono::seconds(std::min(time, size_t(600))));
         }
 
-        get_building_info(upgradable.id);
-        poll.push(domains[upgradable.id]);
+        get_building_info(upgradable.id - 1);
+        poll.push(domains[upgradable.id - 1]);
     }
 
 }

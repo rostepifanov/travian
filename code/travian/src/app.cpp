@@ -39,6 +39,7 @@ void app::run(player& p)
 
     std::string line;
 
+
     while(std::getline(std::cin, line))
     {
         cmd_line cmd(line);
@@ -53,7 +54,7 @@ void app::run(player& p)
                 }
                 catch (std::exception& e)
                 {
-                    std::cout << "Oops!" << std::endl;
+                    std::cout << e.what() << std::endl;
                 }
             }
     }

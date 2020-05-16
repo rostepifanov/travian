@@ -39,7 +39,8 @@ private:
     const std::string login = "login.php";
     const std::string domain = "dorf1.php";
     const std::string village = "dorf2.php";
-    const std::string build_id ="build.php?id=";
+    const std::string village_list = "dorf3.php";
+    const std::string build_id = "build.php?id=";
 
     CDocument html;
     connection con;
@@ -59,18 +60,34 @@ private:
     bool get_valid_build_button(size_t ids);
     std::string get_building_construct_code(defs::BUILD_TYPE type, size_t place_id);
     size_t get_empty_place_id();
+
+    /**
+     * \brief получение информации о стоимости ещё непостроенного здания
+     * \note если здание не доступно, возращается нулевая стоимость
+     * \param type - тип здания, для которого необходимо получить стоимость
+     */
     defs::ivector<5> get_building_build_cost(const defs::BUILD_TYPE type);
+
+    /**
+     * \brief получение информации о стоимости уже построенного здания
+     * \note если здание не построено, возращается нулевая стоимость
+     * \param build - здание, для которого необходимо получить стоимость
+     */
     defs::ivector<5> get_building_upgrade_cost(const defs::building& build);
+
+    /**
+     * \brief получение информации о здание с сервера
+     * \note номера на сервере начинаются с 1
+     * \example <h1 class="titleInHeader">Железный рудник <span class="level">Уровень 0</span></h1>
+     *          разбирается строка вида выше
+     * \param id - номер здания на сервере
+     */
     defs::building get_building_description(size_t id);
 
     size_t get_resource_gathering_time(const defs::ivector<5>& required);
 public:
 
     player(const defs::keys& info);
-
-    ~player() { }
-
-    void run(void);
 
     size_t get_construct_status(void);
     void update_resourses(void);
@@ -79,15 +96,12 @@ public:
     void get_building_info(int i);
     defs::resources get_resoursces(void) const;
 
-    void print_domain_info(void);
-    void print_village_info(void);
-
     bool check_building(defs::BUILD_TYPE type);
     void build(defs::BUILD_TYPE type);
     void run_domain_upgrade_strategy(void);
-};
 
-//std::ostream& operator << (std::ostream& st, const defs::building& build);
+    ~player() { }
+};
 
 //	public function map()
 //	{
