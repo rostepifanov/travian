@@ -4,8 +4,7 @@
 #include <string>
 #include <curl/curl.h>
 
-class connection
-{
+class Connection {
     const std::string cookie = "cookie";
     const std::string user_agent = "Mozilla/5.0 "
                                    "(X11; Linux x86_64) "
@@ -28,7 +27,7 @@ class connection
     void set_cookie();
 
 public:
-    connection();
+    Connection();
 
     /**
      * \brief отправка запроса по url и получение html страницы
@@ -38,7 +37,7 @@ public:
      */
     std::string get_data(const std::string& url, const std::string& method, const std::string& args);
 
-    ~connection();
+    ~Connection();
 };
 
 

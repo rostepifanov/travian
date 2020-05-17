@@ -7,100 +7,92 @@
 #include <vector>
 #include <iostream>
 #include <exception>
+
 #include "connection.h"
 #include "cmd_line.h"
 #include "defs.structs.h"
 #include "defs.game.h"
 #include "defs.h"
+#include "village.h"
+#include "server.h"
 
-class LoginException : public std::exception
-{
-    std::string msg;
-public:
-    LoginException(const defs::keys& info) : msg("Incorrect login-password " + info.login + " " + info.password) { }
 
-    const char * what() const throw() { return msg.c_str(); }
-};
 
-class player
+class Player
 {
 public:
-    class build_button
-    {
-        bool is_valid = false;
-        std::string key = "000000";
-    public:
-        const std::string & operator () (void) { is_valid = false; return key; }
-        void set(const std::string & key) { is_valid = true; this->key = key; }
-        bool valid(void) { return is_valid; }
-    };
+//    class build_button
+//    {
+//        bool is_valid = false;
+//        std::string key = "000000";
+//    public:
+//        const std::string & operator () (void) { is_valid = false; return key; }
+//        void set(const std::string & key) { is_valid = true; this->key = key; }
+//        bool valid(void) { return is_valid; }
+//    };
 
+    Player(const defs::Keys& info);
+
+//    size_t get_construct_status(void);
+//    void update_resourses(void);
+//    void get_domain_info(void);
+//    void get_village_info(void);
+//    void get_building_info(int i);
+//    defs::resources get_resoursces(void) const;
+
+//    bool check_building(defs::BUILD_TYPE type);
+//    void build(defs::BUILD_TYPE type);
+//    void run_domain_upgrade_strategy(void);
+
+    ~Player() { }
 private:
-    const std::string login = "login.php";
-    const std::string domain = "dorf1.php";
-    const std::string village = "dorf2.php";
-    const std::string village_list = "dorf3.php";
-    const std::string build_id = "build.php?id=";
+    const std::string list = "dorf3.php";
+    const std::string village = "dorf1.php?newdid=";
 
-    CDocument html;
-    connection con;
-    std::string page;
-    std::string server;
+    Server server;
 
-    std::array<defs::building, 40> domains;
-    const size_t domain_range = 18;
-    const size_t village_range = 40;
+    void __init_villages(void);
 
-    defs::resources resource;
-    build_button button;
+    int current_village_id;
+    std::vector<Village> villages;
 
-    bool operation_continue = false;
+//    defs::resources resource;
+//    build_button button;
 
-    void upgrade(defs::building& build);
-    bool get_valid_build_button(size_t ids);
-    std::string get_building_construct_code(defs::BUILD_TYPE type, size_t place_id);
-    size_t get_empty_place_id();
+//    bool operation_continue = false;
 
-    /**
-     * \brief получение информации о стоимости ещё непостроенного здания
-     * \note если здание не доступно, возращается нулевая стоимость
-     * \param type - тип здания, для которого необходимо получить стоимость
-     */
-    defs::ivector<5> get_building_build_cost(const defs::BUILD_TYPE type);
+//    void upgrade(defs::building& build);
+//    bool get_valid_build_button(size_t ids);
+//    std::string get_building_construct_code(defs::BUILD_TYPE type, size_t place_id);
+//    size_t get_empty_place_id();
 
-    /**
-     * \brief получение информации о стоимости уже построенного здания
-     * \note если здание не построено, возращается нулевая стоимость
-     * \param build - здание, для которого необходимо получить стоимость
-     */
-    defs::ivector<5> get_building_upgrade_cost(const defs::building& build);
+//    /**
+//     * \brief получение информации о стоимости ещё непостроенного здания
+//     * \note если здание не доступно, возращается нулевая стоимость
+//     * \param type - тип здания, для которого необходимо получить стоимость
+//     */
+//    defs::ivector<5> get_building_build_cost(const defs::BUILD_TYPE type);
 
-    /**
-     * \brief получение информации о здание с сервера
-     * \note номера на сервере начинаются с 1
-     * \example <h1 class="titleInHeader">Железный рудник <span class="level">Уровень 0</span></h1>
-     *          разбирается строка вида выше
-     * \param id - номер здания на сервере
-     */
-    defs::building get_building_description(size_t id);
+//    /**
+//     * \brief получение информации о стоимости уже построенного здания
+//     * \note если здание не построено, возращается нулевая стоимость
+//     * \param build - здание, для которого необходимо получить стоимость
+//     */
+//    defs::ivector<5> get_building_upgrade_cost(const defs::building& build);
 
-    size_t get_resource_gathering_time(const defs::ivector<5>& required);
-public:
+//    /**
+//     * \brief получение информации о здание с сервера
+//     * \note номера на сервере начинаются с 1
+//     * \example <h1 class="titleInHeader">Железный рудник <span class="level">Уровень 0</span></h1>
+//     *          разбирается строка вида выше
+//     * \param id - номер здания на сервере
+//     */
+//    defs::building get_building_description(size_t id);
 
-    player(const defs::keys& info);
+//    size_t get_resource_gathering_time(const defs::ivector<5>& required);
+//public:
 
-    size_t get_construct_status(void);
-    void update_resourses(void);
-    void get_domain_info(void);
-    void get_village_info(void);
-    void get_building_info(int i);
-    defs::resources get_resoursces(void) const;
 
-    bool check_building(defs::BUILD_TYPE type);
-    void build(defs::BUILD_TYPE type);
-    void run_domain_upgrade_strategy(void);
-
-    ~player() { }
 };
 
 //	public function map()

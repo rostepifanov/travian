@@ -1,10 +1,14 @@
 #ifndef DEF_H
 #define DEF_H
 
-#include <string>
 #include <algorithm>
+#include <array>
 #include <vector>
+#include <map>
+#include <ostream>
 #include <sstream>
+#include <string>
+#include <regex>
 
 #include "gumbo/Document.h"
 #include "gumbo/Node.h"
@@ -22,11 +26,13 @@ namespace defs
      * \param str строка для очистки
      * \param delim делимитр для удаления
      */
-    inline void clear(std::string& str, char delim = ' ')
-    {
+    inline void clear(std::string& str, char delim = ' ') {
         std::string::size_type drop = 0;
-        while (str[drop] == delim)
+        while (str[drop] == delim) {
           ++drop;
+        }
+
+        drop = std::min(std::string::size_type(0), drop - 1);
 
         str = str.substr(drop, std::string::npos);
 
@@ -37,12 +43,6 @@ namespace defs
             });
 
         str.erase(new_end, str.end());
-
-//        drop = str.size() - 1;
-//        while (str[drop] == delim)
-//          --drop;
-
-//        str.erase(str.begin() + drop + 1, str.end());
     }
 
     /*!
@@ -51,28 +51,24 @@ namespace defs
      * \param delim разделительный символ
      * \return подстроки строки
      */
-    inline std::vector<std::string> split(std::string str, char delim = ' ')
-    {
+    inline std::vector<std::string> split(std::string str, char delim = ' ') {
         defs::clear(str, delim);
 
         std::vector<std::string> splits;
-        std::stringstream stream(str);
 
-        std::string::iterator new_end = std::unique(str.begin(), str.end(),
-            [delim] (const char &x, const char &y)
-            {
-                return x == y && x == delim;
-            });
+        std::string::size_type drop = 0;
+        while (str[drop] == delim) {
+          ++drop;
+        }
 
-        str.erase(new_end, str.end());
+        str = str.substr(drop, std::string::npos);
 
         while (str[str.length() - 1] == delim) str.pop_back();
 
         size_t i = 0;
         size_t pos = str.find(delim);
 
-        while (pos != std::string::npos)
-        {
+        while (pos != std::string::npos) {
             splits.push_back(str.substr(i, pos - i));
 
             i = pos + 1;
@@ -87,10 +83,8 @@ namespace defs
      * \brief Проверяет является ли строка целым числом
      * \param str строка для проверки
      */
-    inline bool is_integer(const std::string& str)
-    {
-        for (int i = 0; i < str.size(); ++i)
-        {
+    inline bool is_integer(const std::string& str) {
+        for (int i = 0; i < str.size(); ++i) {
             char cur = str[i];
             if ( ! (std::isdigit(cur) || (cur == '-' && i == 0) ) )
               return false;
@@ -99,7 +93,5 @@ namespace defs
         return true && ! str.empty();
     }
 }
-
-
 
 #endif // DEF_H

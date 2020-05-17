@@ -1,6 +1,6 @@
 #include "defs.game.h"
 
-const std::vector<std::string> defs::building::types = {
+const std::vector<std::string> defs::Building::types = {
     {"Лесопилка"},
     {"Глиняный карьер"},
     {"Железный рудник"},
@@ -36,7 +36,7 @@ const std::vector<std::string> defs::building::types = {
     {"Не построено"}
 };
 
-const std::vector<std::string> defs::resources::types = {
+const std::vector<std::string> defs::Resources::types = {
     "storage",
     "production",
     "maxStorage"

@@ -2,7 +2,7 @@
 #include "defs.h"
 
 
-cmd_line::cmd_line(const std::string& line)
+CmdLine::CmdLine(const std::string& line)
 {
     //Поиск комментария в строке
     std::string::size_type pos = line.find('#');
@@ -46,23 +46,23 @@ cmd_line::cmd_line(const std::string& line)
     }
 }
 
-bool cmd_line::has(const std::string& name) const
+bool CmdLine::has(const std::string& name) const
 {
     return std::any_of(args.begin(), args.end(), [&name](const std::array<std::string, 2>& arg){ return arg[0] == name;});
 }
 
-std::string cmd_line::get_cmd() const
+std::string CmdLine::get_cmd() const
 {
     return cmd;
 }
 
-std::string cmd_line::get(const std::string& name) const
+std::string CmdLine::get(const std::string& name) const
 {
     std::vector<named_arg>::const_iterator it = std::find_if(args.begin(), args.end(), [&name](const std::array<std::string, 2>& arg){ return arg[0] == name;});
     return it != args.end() ? (*it)[1] : "";
 }
 
-std::vector<std::string> cmd_line::get_multiple(const std::string& name) const
+std::vector<std::string> CmdLine::get_multiple(const std::string& name) const
 {
     std::vector<std::string> values;
     std::vector<named_arg>::const_iterator it = args.begin();
@@ -74,7 +74,7 @@ std::vector<std::string> cmd_line::get_multiple(const std::string& name) const
     return values;
 }
 
-std::vector<std::string> cmd_line::get_args_without_name() const
+std::vector<std::string> CmdLine::get_args_without_name() const
 {
     return args_without_name;
 }

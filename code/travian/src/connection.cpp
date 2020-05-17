@@ -1,6 +1,6 @@
 #include "connection.h"
 
-connection::connection()
+Connection::Connection()
 {
     if((handle = curl_easy_init()) == nullptr)
         throw std::exception();
@@ -18,18 +18,18 @@ connection::connection()
     curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 1);
 }
 
-connection::~connection()
+Connection::~Connection()
 {
     curl_easy_cleanup(handle);
 }
 
-void connection::set_cookie()
+void Connection::set_cookie()
 {
     curl_easy_setopt(handle, CURLOPT_COOKIEJAR, cookie.c_str());
     curl_easy_setopt(handle, CURLOPT_COOKIEFILE, cookie.c_str());
 }
 
-std::string connection::get_data(const std::string& url, const std::string& method, const std::string& arg)
+std::string Connection::get_data(const std::string& url, const std::string& method, const std::string& arg)
 {
     std::string request = url;
 
@@ -59,7 +59,7 @@ std::string connection::get_data(const std::string& url, const std::string& meth
     return body;
 }
 
-size_t connection::callback(char *data, size_t size, size_t nmemb, std::string *buffer)
+size_t Connection::callback(char *data, size_t size, size_t nmemb, std::string *buffer)
 {
     int result = size * nmemb;
     if(buffer)

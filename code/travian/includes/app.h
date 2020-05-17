@@ -3,31 +3,29 @@
 
 #include "player.h"
 
-class app
-{
-    player* p;
+class App {
+    Player* p;
 
-    app(void) { }
-    app(const app&) = delete;
-    app& operator=(const app&) = delete;
+    App(void) { }
+    App(const App&) = delete;
+    App& operator=(const App&) = delete;
 
-    typedef void (app::*execute)(const cmd_line&);
+    typedef void (App::*execute)(const CmdLine&);
 
-    struct cmd_info
-    {
+    struct CmdInfo {
         std::string cmd;
         execute func;
     };
 
-    static std::vector<cmd_info> cmds;
+    static std::vector<CmdInfo> cmds;
 
-    void execute_test(const cmd_line& cmd);
-    void execute_info_resource(const cmd_line& cmd);
-    void execute_exit(const cmd_line& cmd);
+    void execute_test(const CmdLine& cmd);
+    void execute_info_resource(const CmdLine& cmd);
+    void execute_exit(const CmdLine& cmd);
 
 public:
-    static app& get_instance(void);
-    void run(player& p);
+    static App& get_instance(void);
+    void run(Player& p);
 };
 
 #endif // APP_H
